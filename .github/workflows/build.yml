@@ -1,30 +1,91 @@
 name: Build project
 
-on: [push, pull_request]
+on: 
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-  buildForAllSupportedPlatforms:
-    name: Build for ${{ matrix.targetPlatform }}
+  test:
+    name: automated testing ✨
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         projectPath:
-          - ./
+          - ./ARPetPals
         unityVersion:
           - 2022.2.21f1
         targetPlatform:
-          - Android # Build an Android .apk standalone app.
+          - Android # Build an Android player.
+        testMode:
+          - playmode
+          - editmode
     steps:
+      - uses: actions/checkout@v3
+        with:
+          lfs: true
+      - uses: actions/cache@v3
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key:
+            Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-${{
+            hashFiles(matrix.projectPath) }}
+          restore-keys: |
+            Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-
+            Library-${{ matrix.projectPath }}-
+            Library-
+      - if: matrix.targetPlatform == 'Android'
+        uses: jlumbroso/free-disk-space@v1.3.0
+      - uses: game-ci/unity-test-runner@v3
+        id: testRunner
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: ${{ matrix.testMode }}-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }} 
+          checkName: ${{ matrix.testMode }} Test Results
+          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Test results (all modes)
+          path: ${{ steps.testRunner.outputs.artifactsPath }}
+
+  buildAndTestForLinuxBasedPlatforms:
+    name: Build for ${{ matrix.targetPlatform }} ✨
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projectPath:
+          - ./ARPetPals
+        unityVersion:
+          - 2022.2.21f1
+        targetPlatform:
+          - Android # Build an Android player.
+    steps:
+      # Checkout
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           lfs: true
+      # Cache
       - uses: actions/cache@v3
         with:
-          path: Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
+          path: ${{ matrix.projectPath }}/Library
+          key:
+            Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-${{
+            hashFiles(matrix.projectPath) }}
+          restore-keys: |
+            Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-
+            Library-${{ matrix.projectPath }}-
+            Library-
       - if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.0
       - uses: game-ci/unity-builder@v3
@@ -36,7 +97,8 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
       - uses: actions/upload-artifact@v3
         with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
+          name: Build
+          path: build

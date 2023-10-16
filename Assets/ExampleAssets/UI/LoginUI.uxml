@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/ExampleAssets/UI/LogInBase.uss?fileID=7433441132597879392&amp;guid=3312936dee0d13845b2c2b40bdae36a6&amp;type=3#LogInBase" />
+    <ui:VisualElement name="Container" class="header" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); background-image: url(&apos;project://database/Assets/Background%20for%20mobile%20games,%20forest/Textures/Background,%20summer_9.png?fileID=2800000&amp;guid=52929d854f0a98d4088fcef55e6ef863&amp;type=3#Background, summer_9&apos;); justify-content: center;">
+        <ui:Label tabindex="-1" text="Log in&#10;" display-tooltip-when-elided="true" name="CheckUserName" style="height: 76px; -unity-font: url(&apos;project://database/Assets/TextMesh%20Pro/Fonts/LiberationSans.ttf?fileID=12800000&amp;guid=e3265ab4bf004d28a9537516768c1c75&amp;type=3#LiberationSans&apos;);" />
+        <ui:TextField picking-mode="Ignore" value="User name" name="UserName" />
+        <ui:TextField picking-mode="Ignore" value="Password" name="Password" />
+        <ui:TextField picking-mode="Ignore" value="Confirm Password" name="ConfirmPassword" />
+        <ui:Button text="log In" display-tooltip-when-elided="true" name="LogInButton" />
+        <ui:Button text="Exit" display-tooltip-when-elided="true" name="ExitButton" />
+    </ui:VisualElement>
+</ui:UXML>
